@@ -1,7 +1,7 @@
 {
   "name": "@nazo6/remark-zenn-directive",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "tasks": {
     "dev": "deno run --watch main.ts"
   },
