@@ -43,7 +43,11 @@ const last = <T>(arr: T[]): T | null => {
   return arr[arr.length - 1] ?? null;
 };
 
-export function remarkZennDirective(): (tree: Node) => void {
+export function remarkZennDirective(option?: {
+  messageClassPrefix?: string;
+}): (tree: Node) => void {
+  const messageClassPrefix = option?.messageClassPrefix ?? "message";
+
   return (tree: Node) => {
     const stack: { level: number; type: string }[] = [];
 
@@ -79,7 +83,8 @@ export function remarkZennDirective(): (tree: Node) => void {
               const messageLevel = start.option === "alert"
                 ? "alert"
                 : "warning";
-              rewriteHtml += `<div class="message-${messageLevel}">\n`;
+              rewriteHtml +=
+                `<div class="${messageClassPrefix}-${messageLevel}">\n`;
             } else if (start.type === "details") {
               rewriteHtml += `<details><summary>${
                 start.option || ""
