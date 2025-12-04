@@ -34,8 +34,11 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
+          node-version: ${{ env.NODE_VERSION }}
           registry-url: "https://registry.npmjs.org"
       - uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
       - name: Publish to npm
         run: deno run -A jsr:@ryoppippi/mirror-jsr-to-npm
         env:
