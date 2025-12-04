@@ -1,6 +1,5 @@
 {
   "name": "@nazo6/remark-zenn-directive",
-  "description": "A remark plugin to support Zenn directives in Markdown.",
   "license": "MIT",
   "version": "0.1.0",
   "tasks": {

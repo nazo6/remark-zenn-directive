@@ -1,0 +1,43 @@
+name: Publish to npm
+
+env:
+  NODE_VERSION: lts/*
+  DENO_VERSION: v1.x
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  jsr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Publish package
+        run: npx jsr publish
+
+  npm:
+    needs:
+      - jsr
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: "https://registry.npmjs.org"
+      - uses: denoland/setup-deno@v1
+      - name: Publish to npm
+        run: deno run -A jsr:@ryoppippi/mirror-jsr-to-npm
+        env:
+          PACKAGE_DESCRIPTION: "A remark plugin to support Zenn directives in Markdown."
+          NPM_CONFIG_PROVENANCE: true
