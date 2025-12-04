@@ -1,0 +1,16 @@
+{
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1",
+    "@types/mdast": "npm:@types/mdast@^4.0.4",
+    "@types/unist": "npm:@types/unist@^3.0.3",
+    "mdast": "npm:mdast@^3.0.0",
+    "remark-parse": "npm:remark-parse@^11.0.0",
+    "remark-stringify": "npm:remark-stringify@^11.0.0",
+    "unified": "npm:unified@^11.0.5",
+    "unist": "npm:unist@^0.0.1",
+    "unist-util-visit": "npm:unist-util-visit@^5.0.0"
+  }
+}
