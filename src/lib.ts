@@ -43,7 +43,7 @@ const last = <T>(arr: T[]): T | null => {
   return arr[arr.length - 1] ?? null;
 };
 
-export function remarkZennDirective() {
+export function remarkZennDirective(): (tree: Node) => void {
   return (tree: Node) => {
     const stack: { level: number; type: string }[] = [];
 
