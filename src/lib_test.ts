@@ -161,7 +161,6 @@ async function common(input: string, output: string) {
     .use(remarkZennDirective)
     .use(remarkStringify)
     .process(input);
-  // console.log(String(file));
 
   assertEquals(String(file).trim(), output);
 }
