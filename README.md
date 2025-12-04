@@ -4,6 +4,21 @@
 
 ## Example
 
+```typescript
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
+import remarkZennDirective from "@nazo6/remark-zenn-directive";
+
+const file = await unified()
+  .use(remarkParse)
+  .use(remarkZennDirective)
+  .use(remarkStringify)
+  .process(input);
+
+console.log(String(file));
+```
+
 ```markdown
 ::::details title
 

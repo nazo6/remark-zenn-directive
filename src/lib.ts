@@ -43,6 +43,11 @@ const last = <T>(arr: T[]): T | null => {
   return arr[arr.length - 1] ?? null;
 };
 
+/**
+ * Remark plugin to transform Zenn directives to HTML.
+ *
+ * @param option - Plugin options.
+ */
 export function remarkZennDirective(option?: {
   messageClassPrefix?: string;
 }): (tree: Node) => void {
