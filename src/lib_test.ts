@@ -19,8 +19,6 @@ async function common(name: string) {
     .use(remarkStringify)
     .process(input.trim());
 
-  console.log(file.toString());
-
   assertEquals(String(file).trim(), output.trim());
 }
 

@@ -1,18 +1,24 @@
-<details><summary>title</summary>
+# Inline details (plain text)
 
-content
+<details><summary>title</summary>content</details>
 
-</details>
+# Inline details (link)
 
-<details><summary>title</summary>
+<details><summary>title</summary>[link](https://example.com)</details>
 
-content[link](https://example.com)after.
-
-</details>
+# Inline details (complex)
 
 <details><summary>title</summary>
 
-# Long
+## heading
+
+content[link](https://example.com)after.</details>
+
+# Paragraph details
+
+<details><summary>title</summary>
+
+## heading
 
 content
 

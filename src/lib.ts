@@ -1,4 +1,12 @@
-import type { Html, Root } from "mdast";
+import type {
+  Html,
+  Paragraph,
+  Parent,
+  PhrasingContent,
+  Root,
+  RootContent,
+  Text,
+} from "mdast";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
@@ -52,69 +60,140 @@ export type Options = {
  * @param option - Plugin options.
  */
 export const remarkZennDirective: Plugin<[Options?], Root> = (option) => {
+  type DirectiveStart = {
+    node: Text;
+    line: number;
+    type: string;
+    option: string | null;
+    parent: Parent;
+  };
+  type DirectiveEnd = { node: Text; line: number; parent: Parent };
+  type Directive = { start: DirectiveStart; end: DirectiveEnd };
+
   const messageClassPrefix = option?.messageClassPrefix ?? "message";
 
   return (tree) => {
-    const stack: { level: number; type: string }[] = [];
+    const stack: {
+      level: number;
+      start: DirectiveStart;
+    }[] = [];
 
-    visit(tree, "text", (node) => {
+    const directives: Directive[] = [];
+
+    visit(tree, "text", (node, index, parent) => {
+      if (!parent || typeof index !== "number") {
+        return;
+      }
+
       const lines = node.value.split("\n");
 
-      let rewriteHtml = "";
-      let text = "";
+      let i = -1;
       for (const line of lines) {
+        i++;
         const start = matchDirectiveStart(line);
         const end = matchDirectiveEnd(line);
         if (end) {
           const stackItem = last(stack);
           if (stackItem && stackItem.level === end.directive.length) {
-            if (
-              !(stackItem.type === "message" ||
-                stackItem.type === "details")
-            ) {
-              throw new Error(
-                `Mismatched directive end for type: ${stackItem.type}`,
-              );
-            }
-
-            rewriteHtml += text;
-
-            if (stackItem.type === "message") {
-              rewriteHtml += `\n</div>\n`;
-            } else if (stackItem.type === "details") {
-              rewriteHtml += `\n</details>\n`;
-            }
-            stack.pop();
+            const item = stack.pop();
+            directives.push({
+              start: item!.start,
+              end: { node, line: i, parent },
+            });
           }
         } else if (start) {
           if ((last(stack)?.level ?? Infinity) < start.directive.length) {
             continue;
           }
-          stack.push({ level: start.directive.length, type: start.type });
-
-          if (start.type === "message") {
-            const messageLevel = start.option === "alert" ? "alert" : "warning";
-            rewriteHtml +=
-              `<div class="${messageClassPrefix}-${messageLevel}">\n\n`;
-          } else if (start.type === "details") {
-            rewriteHtml += `<details><summary>${
-              start.option || ""
-            }</summary>\n\n`;
-          } else {
-            console.warn(`Unknown directive type: ${start.type}`);
-          }
-        } else if (rewriteHtml) {
-          rewriteHtml += `${line}\n`;
-        } else {
-          text += line + "\n";
+          stack.push({
+            level: start.directive.length,
+            start: { node, line: i, ...start, parent },
+          });
         }
       }
-
-      if (rewriteHtml) {
-        const htmlNode = node as unknown as Html;
-        htmlNode.type = "html";
-        htmlNode.value = rewriteHtml.trim();
-      }
     });
+
+    const getHtmlForDirective = (d: Directive): [string, string] | null => {
+      if (d.start.type === "message") {
+        let messageLevel: string;
+        if (d.start.option === null) {
+          messageLevel = "warning";
+        } else if (d.start.option === "alert") {
+          messageLevel = "alert";
+        } else {
+          throw new Error("Invalid message directive option");
+        }
+
+        return [
+          `<div class="${messageClassPrefix}-${messageLevel}">`,
+          `</div>`,
+        ];
+      } else if (d.start.type === "details") {
+        return [
+          `<details><summary>${d.start.option ?? ""}</summary>`,
+          `</details>`,
+        ];
+      } else {
+        return null;
+      }
+    };
+
+    const par = <T extends PhrasingContent>(value: T): Paragraph => {
+      return {
+        type: "paragraph",
+        children: [value],
+      };
+    };
+
+    for (const directive of directives) {
+      const html = getHtmlForDirective(directive);
+      if (!html) continue;
+      const [startHtml, endHtml] = html;
+
+      if (directive.start.node === directive.end.node) {
+        const text = directive.start.node.value.split("\n").slice(
+          directive.start.line + 1,
+          directive.end.line,
+        ).join("\n");
+        const index = directive.start.parent.children.indexOf(
+          directive.start.node,
+        );
+        directive.start.parent.children.splice(
+          index,
+          1,
+          { type: "html", value: startHtml },
+          { type: "text", value: text },
+          { type: "html", value: endHtml },
+        );
+      } else {
+        {
+          const { node, parent, line } = directive.start;
+          const remained = node.value.split("\n").slice(line + 1).join("\n");
+          const newNodes: RootContent[] = [
+            { type: "html", value: startHtml },
+            ...(remained ? [{ type: "text", value: remained }] as const : []),
+          ];
+          parent.children.splice(
+            parent.children.indexOf(node),
+            1,
+            ...newNodes,
+          );
+        }
+
+        {
+          const { node, parent, line } = directive.end;
+          const remained = node.value.split("\n").slice(0, line).join("\n");
+          const newNodes: RootContent[] = [
+            ...(remained ? [{ type: "text", value: remained }] as const : []),
+            { type: "html", value: endHtml },
+          ];
+          parent.children.splice(
+            parent.children.indexOf(node),
+            1,
+            ...newNodes,
+          );
+        }
+      }
+    }
   };
 };

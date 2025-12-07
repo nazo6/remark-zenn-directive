@@ -19,6 +19,8 @@ const file = await unified()
 console.log(String(file));
 ```
 
+以上のようなコードで、以下のような変換が行われます。
+
 ```markdown
 ::::details title
 
@@ -55,4 +57,36 @@ Alert
 </div>
 
 </details>
+```
+
+## 既知の制限
+
+以下の項目はZennではサポートされていますが、このプラグインではサポートされていません。
+
+### インラインのディレクティブ
+
+以下のように、`:::`の間に行間を開けないことは推奨されません。
+
+```
+:::message
+[link](https://example.com)
+:::
+```
+
+これは、このmarkdownが
+
+```
+<div class="message-warning">[link](https://example.com)</div>
+```
+
+と変換されるためです。テキストのみであればこれは動作しますが、例のようにHTML内にmarkdownが混在すると、後続の処理で正しく解釈されない可能性があるため、避けてください。
+
+代わりに、以下のように行間を開けてください。
+
+```
+:::message
+
+[link](https://example.com)
+
+:::
 ```

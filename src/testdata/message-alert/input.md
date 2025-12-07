@@ -1,13 +1,34 @@
+# Inline message (plain text)
+
 :::message alert
-Alert
+hello
 :::
+
+# Inline message (link)
 
 :::message alert
 [link](https://example.com)
 :::
 
+# Inline message (complex)
+
+:::message alert
+## heading
+before.[link](https://example.com).after
+:::
+
+# Paragraph message (plain text)
+
 :::message alert
 
-Alert
+hello
+
+:::
+
+# Paragraph message (cpmplex)
+
+:::message alert
+
+[link](https://example.com)
 
 :::
