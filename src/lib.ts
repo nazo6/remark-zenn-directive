@@ -1,11 +1,4 @@
-import type {
-  Paragraph,
-  Parent,
-  PhrasingContent,
-  Root,
-  RootContent,
-  Text,
-} from "mdast";
+import type { Parent, Root, RootContent, Text } from "mdast";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
@@ -124,13 +117,13 @@ export const remarkZennDirective: Plugin<[Options?], Root> = (option) => {
         }
 
         return [
-          `<div class="${messageClassPrefix}-${messageLevel}">`,
-          `</div>`,
+          `<div class="${messageClassPrefix}-${messageLevel}">\n\n`,
+          `\n\n</div>`,
         ];
       } else if (d.start.type === "details") {
         return [
-          `<details><summary>${d.start.option ?? ""}</summary>`,
-          `</details>`,
+          `<details><summary>${d.start.option ?? ""}</summary>\n\n`,
+          `\n\n</details>`,
         ];
       } else {
         return null;
