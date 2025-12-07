@@ -1,5 +1,4 @@
 import type {
-  Html,
   Paragraph,
   Parent,
   PhrasingContent,
@@ -136,13 +135,6 @@ export const remarkZennDirective: Plugin<[Options?], Root> = (option) => {
       } else {
         return null;
       }
-    };
-
-    const par = <T extends PhrasingContent>(value: T): Paragraph => {
-      return {
-        type: "paragraph",
-        children: [value],
-      };
     };
 
     for (const directive of directives) {
