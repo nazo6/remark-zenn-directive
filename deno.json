@@ -3,7 +3,8 @@
   "license": "MIT",
   "version": "0.1.2",
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --watch main.ts",
+    "test": "deno test --allow-read"
   },
   "exports": "./mod.ts",
   "imports": {
@@ -16,5 +17,10 @@
     "unified": "npm:unified@^11.0.5",
     "unist": "npm:unist@^0.0.1",
     "unist-util-visit": "npm:unist-util-visit@^5.0.0"
+  },
+  "fmt": {
+    "exclude": [
+      "src/testdata/"
+    ]
   }
 }

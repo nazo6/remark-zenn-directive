@@ -1,10 +1,6 @@
-import type { Html } from "mdast";
-import type { Literal, Node } from "unist";
+import type { Html, Root } from "mdast";
+import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
-
-const isTextNode = (node: Node): node is Literal & { value: string } => {
-  return node.type === "text" && "value" in node;
-};
 
 const directiveStartRegex = /(?<directive>:+)(?<type>\S+)(\s+(?<option>.+))?/;
 const directiveEndRegex = /(?<directive>:+)\s*$/;
@@ -44,80 +40,81 @@ const last = <T>(arr: T[]): T | null => {
 };
 
 /**
+ * Options for the remarkZennDirective plugin.
+ */
+export type Options = {
+  messageClassPrefix?: string;
+};
+
+/**
  * Remark plugin to transform Zenn directives to HTML.
  *
  * @param option - Plugin options.
  */
-export function remarkZennDirective(option?: {
-  messageClassPrefix?: string;
-}): (tree: Node) => void {
+export const remarkZennDirective: Plugin<[Options?], Root> = (option) => {
   const messageClassPrefix = option?.messageClassPrefix ?? "message";
 
-  return (tree: Node) => {
+  return (tree) => {
     const stack: { level: number; type: string }[] = [];
 
-    visit(tree, ["text"], (node) => {
-      if (isTextNode(node)) {
-        const lines = node.value.split("\n");
+    visit(tree, "text", (node) => {
+      const lines = node.value.split("\n");
 
-        let rewriteHtml = "";
-        let text = "";
-        for (const line of lines) {
-          const start = matchDirectiveStart(line);
-          const end = matchDirectiveEnd(line);
-          if (end) {
-            const stackItem = last(stack);
-            if (stackItem && stackItem.level === end.directive.length) {
-              if (
-                !(stackItem.type === "message" || stackItem.type === "details")
-              ) {
-                throw new Error(
-                  `Mismatched directive end for type: ${stackItem.type}`,
-                );
-              }
-
-              rewriteHtml += text;
-
-              if (stackItem.type === "message") {
-                rewriteHtml += `</div>\n`;
-              } else if (stackItem.type === "details") {
-                rewriteHtml += `</details>\n`;
-              }
-              stack.pop();
+      let rewriteHtml = "";
+      let text = "";
+      for (const line of lines) {
+        const start = matchDirectiveStart(line);
+        const end = matchDirectiveEnd(line);
+        if (end) {
+          const stackItem = last(stack);
+          if (stackItem && stackItem.level === end.directive.length) {
+            if (
+              !(stackItem.type === "message" ||
+                stackItem.type === "details")
+            ) {
+              throw new Error(
+                `Mismatched directive end for type: ${stackItem.type}`,
+              );
             }
-          } else if (start) {
-            if ((last(stack)?.level ?? Infinity) < start.directive.length) {
-              continue;
-            }
-            stack.push({ level: start.directive.length, type: start.type });
 
-            if (start.type === "message") {
-              const messageLevel = start.option === "alert"
-                ? "alert"
-                : "warning";
-              rewriteHtml +=
-                `<div class="${messageClassPrefix}-${messageLevel}">\n`;
-            } else if (start.type === "details") {
-              rewriteHtml += `<details><summary>${
-                start.option || ""
-              }</summary>\n`;
-            } else {
-              console.warn(`Unknown directive type: ${start.type}`);
+            rewriteHtml += text;
+
+            if (stackItem.type === "message") {
+              rewriteHtml += `\n</div>\n`;
+            } else if (stackItem.type === "details") {
+              rewriteHtml += `\n</details>\n`;
             }
-          } else if (rewriteHtml) {
-            rewriteHtml += `${line}\n`;
-          } else {
-            text += line + "\n";
+            stack.pop();
           }
-        }
+        } else if (start) {
+          if ((last(stack)?.level ?? Infinity) < start.directive.length) {
+            continue;
+          }
+          stack.push({ level: start.directive.length, type: start.type });
 
-        if (rewriteHtml) {
-          const htmlNode = node as unknown as Html;
-          htmlNode.type = "html";
-          htmlNode.value = rewriteHtml.trim();
-          delete (htmlNode as any).children;
+          if (start.type === "message") {
+            const messageLevel = start.option === "alert" ? "alert" : "warning";
+            rewriteHtml +=
+              `<div class="${messageClassPrefix}-${messageLevel}">\n\n`;
+          } else if (start.type === "details") {
+            rewriteHtml += `<details><summary>${
+              start.option || ""
+            }</summary>\n\n`;
+          } else {
+            console.warn(`Unknown directive type: ${start.type}`);
+          }
+        } else if (rewriteHtml) {
+          rewriteHtml += `${line}\n`;
+        } else {
+          text += line + "\n";
         }
+      }
+
+      if (rewriteHtml) {
+        const htmlNode = node as unknown as Html;
+        htmlNode.type = "html";
+        htmlNode.value = rewriteHtml.trim();
       }
     });
   };
-}
+};
