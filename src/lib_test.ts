@@ -12,6 +12,10 @@ Warning
 :::
 
 :::message
+Warning,[inline link](https://example.com)after content.
+:::
+
+:::message
 
 Warning
 
@@ -20,6 +24,10 @@ Warning
   `
 <div class="message-warning">
 Warning
+</div>
+
+<div class="message-warning">
+Warning,[inline link](https://example.com)after content.
 </div>
 
 <div class="message-warning">
@@ -68,6 +76,10 @@ content
 :::
 
 :::details title
+content[link](https://example.com)after.
+:::
+
+:::details title
 
 # Long
 
@@ -80,6 +92,10 @@ content
   `
 <details><summary>title</summary>
 content
+</details>
+
+<details><summary>title</summary>
+content[link](https://example.com)after.
 </details>
 
 <details><summary>title</summary>
@@ -161,6 +177,8 @@ async function common(input: string, output: string) {
     .use(remarkZennDirective)
     .use(remarkStringify)
     .process(input);
+
+  console.log(file.toString());
 
   assertEquals(String(file).trim(), output);
 }

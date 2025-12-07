@@ -61,20 +61,27 @@ export function remarkZennDirective(option?: {
         const lines = node.value.split("\n");
 
         let rewriteHtml = "";
+        let text = "";
         for (const line of lines) {
           const start = matchDirectiveStart(line);
           const end = matchDirectiveEnd(line);
           if (end) {
             const stackItem = last(stack);
             if (stackItem && stackItem.level === end.directive.length) {
+              if (
+                !(stackItem.type === "message" || stackItem.type === "details")
+              ) {
+                throw new Error(
+                  `Mismatched directive end for type: ${stackItem.type}`,
+                );
+              }
+
+              rewriteHtml += text;
+
               if (stackItem.type === "message") {
                 rewriteHtml += `</div>\n`;
               } else if (stackItem.type === "details") {
                 rewriteHtml += `</details>\n`;
-              } else {
-                throw new Error(
-                  `Mismatched directive end for type: ${stackItem.type}`,
-                );
               }
               stack.pop();
             }
@@ -99,6 +106,8 @@ export function remarkZennDirective(option?: {
             }
           } else if (rewriteHtml) {
             rewriteHtml += `${line}\n`;
+          } else {
+            text += line + "\n";
           }
         }
 
