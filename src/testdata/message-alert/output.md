@@ -6,6 +6,8 @@ hello
 
 </div>
 
+
+
 # Inline message (link)
 
 <div class="message-alert">
@@ -13,6 +15,8 @@ hello
 [link](https://example.com)
 
 </div>
+
+
 
 # Inline message (complex)
 
@@ -26,6 +30,8 @@ before.[link](https://example.com).after
 
 </div>
 
+
+
 # Paragraph message (plain text)
 
 <div class="message-alert">
@@ -37,6 +43,8 @@ hello
 
 
 </div>
+
+
 
 # Paragraph message (cpmplex)
 

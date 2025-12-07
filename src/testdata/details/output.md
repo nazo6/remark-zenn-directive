@@ -6,6 +6,8 @@ content
 
 </details>
 
+
+
 # Inline details (link)
 
 <details><summary>title</summary>
@@ -13,6 +15,8 @@ content
 [link](https://example.com)
 
 </details>
+
+
 
 # Inline details (complex)
 
@@ -25,6 +29,8 @@ content
 content[link](https://example.com)after.
 
 </details>
+
+
 
 # Paragraph details
 

@@ -118,12 +118,12 @@ export const remarkZennDirective: Plugin<[Options?], Root> = (option) => {
 
         return [
           `<div class="${messageClassPrefix}-${messageLevel}">\n\n`,
-          `\n\n</div>`,
+          `\n\n</div>\n\n`,
         ];
       } else if (d.start.type === "details") {
         return [
           `<details><summary>${d.start.option ?? ""}</summary>\n\n`,
-          `\n\n</details>`,
+          `\n\n</details>\n\n`,
         ];
       } else {
         return null;
